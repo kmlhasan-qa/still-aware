@@ -1,16 +1,5 @@
 import { expect, test } from '@playwright/test';
-
-const LOGIN_PATH = '/api/login';
-
-const VALID_CREDENTIALS = {
-	email: 'testautomation@mailsac.com',
-	password: 'Password',
-};
-
-const DISABLED_CREDENTIALS = {
-	email: 'disabledaccount@mailsac.com',
-	password: 'Password',
-};
+import { DISABLED_CREDENTIALS, LOGIN_PATH, VALID_CREDENTIALS } from '../auth.helper';
 
 test.describe('POST /api/login', () => {
 	test('200: success with valid credentials', async ({ request }) => {
