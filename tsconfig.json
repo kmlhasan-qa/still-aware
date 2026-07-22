@@ -14,7 +14,6 @@
     "src/**/*.ts",
     "helpers/**/*.ts",
     "tests/**/*.ts",
-    "global-setup*.ts",
     "playwright.config.ts"
   ]
 }

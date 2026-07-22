@@ -1,18 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
-import { HRIS_BASE_URL } from './helpers/config';
 
 export default defineConfig({
   testDir: './tests',
-
-  globalSetup: require.resolve('./global-setup.ts'),
 
   timeout: 180000,
   retries: 1,
   workers: 1,
 
   use: {
-    baseURL: HRIS_BASE_URL,
-    storageState: 'playwright/.auth/user.json',
+    baseURL: 'https://cms-stillaware.itmanage.com.au',
 
     headless: true,
     viewport: { width: 1440, height: 900 },
