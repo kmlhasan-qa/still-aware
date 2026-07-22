@@ -7,6 +7,11 @@ const VALID_CREDENTIALS = {
 	password: 'Password',
 };
 
+const DISABLED_CREDENTIALS = {
+	email: 'disabledaccount@mailsac.com',
+	password: 'Password',
+};
+
 test.describe('POST /api/login', () => {
 	test('200: success with valid credentials', async ({ request }) => {
 		const response = await request.post(LOGIN_PATH, {
@@ -28,6 +33,14 @@ test.describe('POST /api/login', () => {
 		});
 
 		expect(response.status()).toBe(401);
+	});
+
+	test('403: this account has been disabled', async ({ request }) => {
+		const response = await request.post(LOGIN_PATH, {
+			data: DISABLED_CREDENTIALS,
+		});
+
+		expect(response.status()).toBe(403);
 	});
 
 	test('422: validation error', async ({ request }) => {
