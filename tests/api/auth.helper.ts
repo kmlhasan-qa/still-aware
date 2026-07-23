@@ -17,10 +17,38 @@ function extractToken(body: Record<string, any>): string | null {
 	return typeof token === 'string' && token.length > 0 ? token : null;
 }
 
-export async function loginAndGetToken(request: APIRequestContext): Promise<string> {
-	const response = await request.post(LOGIN_PATH, {
-		data: VALID_CREDENTIALS,
+let cachedToken: string | null = null;
+
+function delay(ms: number): Promise<void> {
+	return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function postLoginWithRetry(
+	request: APIRequestContext,
+	data: Record<string, string>
+): Promise<Awaited<ReturnType<APIRequestContext['post']>>> {
+	let response = await postLogin(request, data);
+
+	for (let attempt = 1; response.status() === 429 && attempt <= 12; attempt++) {
+		await delay(5000);
+		response = await postLogin(request, data);
+	}
+
+	return response;
+}
+
+export async function postLogin(
+	request: APIRequestContext,
+	data: Record<string, string> = VALID_CREDENTIALS
+) {
+	return request.post(LOGIN_PATH, {
+		data,
 	});
+}
+
+
+async function loginAndStoreToken(request: APIRequestContext): Promise<string> {
+	const response = await postLoginWithRetry(request, VALID_CREDENTIALS);
 
 	expect(response.status()).toBe(200);
 
@@ -29,5 +57,30 @@ export async function loginAndGetToken(request: APIRequestContext): Promise<stri
 
 	expect(token, `Expected auth token in login response: ${JSON.stringify(body)}`).toBeTruthy();
 
-	return token as string;
+	cachedToken = token as string;
+	return cachedToken;
+}
+
+export async function getCachedLoginToken(request: APIRequestContext): Promise<string> {
+	if (cachedToken) {
+		return cachedToken;
+	}
+
+	return loginAndStoreToken(request);
+}
+
+export async function getFreshLoginToken(request: APIRequestContext): Promise<string> {
+	cachedToken = null;
+	return loginAndStoreToken(request);
+}
+
+export async function loginAndGetToken(
+	request: APIRequestContext,
+	options: { refresh?: boolean } = {}
+): Promise<string> {
+	if (!options.refresh && cachedToken) {
+		return cachedToken;
+	}
+
+	return loginAndStoreToken(request);
 }
