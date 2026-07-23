@@ -1,23 +1,15 @@
 import { expect, test } from '@playwright/test';
-import { getCachedLoginToken, logPrettyResponse } from '../auth.helper';
-
-const CMS_PATH = '/api/cms';
+import { logPrettyResponse } from '../auth.helper';
+import { fetchCmsListAndStoreSlugs } from './cmspage.helper';
 
 test.describe('GET /api/cms', () => {
 	test('200: success with valid token', async ({ request }) => {
-		const token = await getCachedLoginToken(request);
+		const result = await fetchCmsListAndStoreSlugs(request);
 
-		const response = await request.get(CMS_PATH, {
-			headers: {
-				Authorization: `Bearer ${token}`,
-				Accept: 'application/json',
-			},
-		});
+		await logPrettyResponse('GET /api/cms response', result.response, result.bodyText);
 
-		const bodyText = await response.text();
-		await logPrettyResponse('GET /api/cms response', response, bodyText);
-
-		expect(response.status()).toBe(200);
-		expect(bodyText).toBeTruthy();
+		expect(result.status).toBe(200);
+		expect(result.bodyText).toBeTruthy();
+		expect(result.slugs.length).toBeGreaterThan(0);
 	});
 });
