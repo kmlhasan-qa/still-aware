@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - develop
 
 permissions:
   contents: read
@@ -114,7 +115,7 @@ jobs:
               "title": ("Playwright Test Completed - " + $status),
               "sections": [
                 {
-                  "activityTitle": "Talentra API staging results",
+                  "activityTitle": "Still Aware API staging results",
                   "facts": [
                     { "name": "Status", "value": $status },
                     { "name": "Branch", "value": $branch },
