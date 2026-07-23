@@ -1,16 +1,19 @@
 import { expect, test } from '@playwright/test';
 import {
 	DISABLED_CREDENTIALS,
+	logPrettyResponse,
+	loginAndCaptureToken,
 	postLogin,
-	getFreshLoginToken,
 	VALID_CREDENTIALS,
 } from '../auth.helper';
 
 test.describe('POST /api/login', () => {
 	test('200: success with valid credentials', async ({ request }) => {
-		const token = await getFreshLoginToken(request);
+		const capture = await loginAndCaptureToken(request);
+		await logPrettyResponse('POST /api/login response', capture.response, JSON.stringify(capture.body, null, 2));
 
-		expect(token).toBeTruthy();
+		expect(capture.response.status()).toBe(200);
+		expect(capture.body).toBeTruthy();
 	});
 
 	test('401: invalid credentials', async ({ request }) => {

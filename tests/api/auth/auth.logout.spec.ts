@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { getCachedLoginToken } from '../auth.helper';
+import { clearCachedLoginToken, getCachedLoginToken } from '../auth.helper';
 
 const LOGOUT_PATH = '/api/logout';
 
@@ -17,6 +17,8 @@ test.describe('POST /api/logout', () => {
 
 		const body = await response.json();
 		expect(body).toBeTruthy();
+
+		clearCachedLoginToken();
 	});
 
 	test('401: unauthenticated without token', async ({ request }) => {

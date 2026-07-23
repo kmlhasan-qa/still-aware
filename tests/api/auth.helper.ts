@@ -1,4 +1,4 @@
-import { expect, type APIRequestContext } from '@playwright/test';
+import { expect, type APIRequestContext, type APIResponse } from '@playwright/test';
 
 export const LOGIN_PATH = '/api/login';
 
@@ -12,6 +12,12 @@ export const DISABLED_CREDENTIALS = {
 	password: 'Password',
 };
 
+export type LoginCapture = {
+	response: APIResponse;
+	body: Record<string, any>;
+	token: string;
+};
+
 function extractToken(body: Record<string, any>): string | null {
 	const token = body.token ?? body.access_token ?? body.data?.token ?? body.data?.access_token;
 	return typeof token === 'string' && token.length > 0 ? token : null;
@@ -23,13 +29,30 @@ function delay(ms: number): Promise<void> {
 	return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+export async function logPrettyResponse(
+	label: string,
+	response: APIResponse,
+	rawBody?: string
+): Promise<void> {
+	const responseBody = rawBody ?? (await response.text());
+
+	try {
+		const parsedBody = JSON.parse(responseBody);
+		console.log(`${label} [${response.status()}]:`);
+		console.log(JSON.stringify(parsedBody, null, 2));
+		return;
+	} catch {
+		console.log(`${label} [${response.status()}]: ${responseBody || '<empty body>'}`);
+	}
+}
+
 async function postLoginWithRetry(
 	request: APIRequestContext,
 	data: Record<string, string>
 ): Promise<Awaited<ReturnType<APIRequestContext['post']>>> {
 	let response = await postLogin(request, data);
 
-	for (let attempt = 1; response.status() === 429 && attempt <= 12; attempt++) {
+	for (let attempt = 1; response.status() === 429 && attempt <= 6; attempt++) {
 		await delay(5000);
 		response = await postLogin(request, data);
 	}
@@ -47,7 +70,7 @@ export async function postLogin(
 }
 
 
-async function loginAndStoreToken(request: APIRequestContext): Promise<string> {
+async function loginAndStoreToken(request: APIRequestContext): Promise<LoginCapture> {
 	const response = await postLoginWithRetry(request, VALID_CREDENTIALS);
 
 	expect(response.status()).toBe(200);
@@ -58,7 +81,11 @@ async function loginAndStoreToken(request: APIRequestContext): Promise<string> {
 	expect(token, `Expected auth token in login response: ${JSON.stringify(body)}`).toBeTruthy();
 
 	cachedToken = token as string;
-	return cachedToken;
+	return {
+		response,
+		body,
+		token: cachedToken,
+	};
 }
 
 export async function getCachedLoginToken(request: APIRequestContext): Promise<string> {
@@ -66,12 +93,23 @@ export async function getCachedLoginToken(request: APIRequestContext): Promise<s
 		return cachedToken;
 	}
 
-	return loginAndStoreToken(request);
+	const capture = await loginAndStoreToken(request);
+	return capture.token;
 }
 
 export async function getFreshLoginToken(request: APIRequestContext): Promise<string> {
 	cachedToken = null;
+	const capture = await loginAndStoreToken(request);
+	return capture.token;
+}
+
+export async function loginAndCaptureToken(request: APIRequestContext): Promise<LoginCapture> {
+	cachedToken = null;
 	return loginAndStoreToken(request);
+}
+
+export function clearCachedLoginToken(): void {
+	cachedToken = null;
 }
 
 export async function loginAndGetToken(
@@ -82,5 +120,6 @@ export async function loginAndGetToken(
 		return cachedToken;
 	}
 
-	return loginAndStoreToken(request);
+	const capture = await loginAndStoreToken(request);
+	return capture.token;
 }
