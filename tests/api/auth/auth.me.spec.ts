@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { getFreshLoginToken } from '../auth.helper';
+import { getFreshLoginToken } from '../helpers/auth.helper';
 
 const USER_PATH = '/api/user';
 

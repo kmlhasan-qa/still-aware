@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "test:api:login": "playwright test tests/api/auth/auth.login.spec.ts"
+    "test:api:login": "playwright test tests/api/auth/auth.login.spec.ts",
+    "test:api:donations": "playwright test tests/api/donations/donations.oneoff.spec.ts && playwright test tests/api/donations/donations.recurring.spec.ts && playwright test tests/api/donations/donations.capture.spec.ts"
   },
   "keywords": [],
   "author": "",

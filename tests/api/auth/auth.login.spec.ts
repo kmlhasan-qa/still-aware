@@ -5,7 +5,7 @@ import {
 	loginAndCaptureToken,
 	postLogin,
 	VALID_CREDENTIALS,
-} from '../auth.helper';
+} from '../helpers/auth.helper';
 
 test.describe('POST /api/login', () => {
 	test('200: success with valid credentials', async ({ request }) => {

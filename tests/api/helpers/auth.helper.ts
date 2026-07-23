@@ -79,7 +79,6 @@ export async function postLogin(
 	});
 }
 
-
 async function loginAndStoreToken(request: APIRequestContext): Promise<LoginCapture> {
 	const response = await postLoginWithRetry(request, VALID_CREDENTIALS);
 

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { clearCachedLoginToken, getCachedLoginToken } from '../auth.helper';
+import { clearCachedLoginToken, getCachedLoginToken } from '../helpers/auth.helper';
 
 const LOGOUT_PATH = '/api/logout';
 

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
-import { getCachedLoginToken, logPrettyResponse } from '../auth.helper';
-import { getStoredCmsSlugsOrFetch } from './cmspage.helper';
+import { getCachedLoginToken, logPrettyResponse } from '../helpers/auth.helper';
+import { getStoredCmsSlugsOrFetch } from '../helpers/cms.helper';
 
 const CMS_SHOW_PATH = '/api/cms';
 

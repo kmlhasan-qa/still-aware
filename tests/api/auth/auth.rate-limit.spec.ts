@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { postLogin } from '../auth.helper';
+import { postLogin } from '../helpers/auth.helper';
 
 test.describe('POST /api/login rate limiting', () => {
 	test('429: too many login attempts after repeated requests', async ({ request }) => {

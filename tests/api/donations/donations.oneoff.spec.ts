@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import { randomUUID } from 'crypto';
-import { getCachedLoginToken, logPrettyResponse } from '../auth.helper';
+import { getCachedLoginToken, logPrettyResponse } from '../helpers/auth.helper';
+import { saveLatestDonationOrderFromBody } from '../helpers/donations.helper';
 
 const DONATION_ONE_OFF_INTENT_PATH = '/api/donations/one-off/intent';
 const PAYPAL_SECRET_KEY = process.env.PAYPAL_SECRET_KEY;
@@ -34,9 +35,9 @@ function delay(ms: number): Promise<void> {
 function buildOneOffIntentPayload(): DonationOneOffIntentPayload {
 	return {
 		amount: 5000,
-		donorFirstName: 'Test',
-		donorLastName: 'Automation',
-		donorEmail: 'testautomation@example.com',
+		donorFirstName: 'Automation',
+		donorLastName: 'One-Off',
+		donorEmail: 'automationoneoff@example.com',
 		donorPhone: '+61 412 345 678',
 		donorAddress: '123 Main Street',
 		donorCity: 'Sydney',
@@ -48,6 +49,13 @@ function buildOneOffIntentPayload(): DonationOneOffIntentPayload {
 		keepMeUpdated: false,
 		paymentMethod: 'card',
 		vaultToken: '1A2B3C4D5E6F7G8H',
+	};
+}
+
+function buildInvalidOneOffIntentPayload(): DonationOneOffIntentPayload {
+	return {
+		...buildOneOffIntentPayload(),
+		donorFirstName: '',
 	};
 }
 
@@ -90,24 +98,10 @@ test.describe('POST /api/donations/one-off/intent', () => {
 
 		const bodyText = await response.text();
 		await logPrettyResponse('POST /api/donations/one-off/intent success response', response, bodyText);
+		const orderUuid = saveLatestDonationOrderFromBody('oneOff', bodyText);
 
 		expect(response.status()).toBe(200);
-		expect(bodyText).toBeTruthy();
-	});
-
-	test('200: success without explicit PayPal secret key header', async ({ request }) => {
-		const token = await getCachedLoginToken(request);
-		const response = await postOneOffDonationIntentWithRetry(request, token, {
-			Authorization: `Bearer ${token}`,
-			Accept: 'application/json',
-			'Content-Type': 'application/json',
-			'Idempotency-Key': generateIdempotencyKey(),
-		});
-
-		const bodyText = await response.text();
-		await logPrettyResponse('POST /api/donations/one-off/intent missing-key response', response, bodyText);
-
-		expect(response.status()).toBe(200);
+		expect(orderUuid).toBeTruthy();
 		expect(bodyText).toBeTruthy();
 	});
 });

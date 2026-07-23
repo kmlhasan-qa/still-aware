@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { getCachedLoginToken, logPrettyResponse } from '../auth.helper';
+import { getCachedLoginToken, logPrettyResponse } from '../helpers/auth.helper';
 
 const HOME_PATH = '/api/home';
 

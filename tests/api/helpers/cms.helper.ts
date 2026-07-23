@@ -1,5 +1,5 @@
 import { type APIRequestContext, type APIResponse } from '@playwright/test';
-import { getCachedLoginToken } from '../auth.helper';
+import { getCachedLoginToken } from './auth.helper';
 
 const CMS_PATH = '/api/cms';
 
