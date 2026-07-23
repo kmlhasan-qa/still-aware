@@ -10,7 +10,7 @@ import {
 test.describe('POST /api/login', () => {
 	test('200: success with valid credentials', async ({ request }) => {
 		const capture = await loginAndCaptureToken(request);
-		await logPrettyResponse('POST /api/login response', capture.response, JSON.stringify(capture.body, null, 2));
+		await logPrettyResponse('POST /api/login response', capture.response, JSON.stringify(capture.body));
 
 		expect(capture.response.status()).toBe(200);
 		expect(capture.body).toBeTruthy();

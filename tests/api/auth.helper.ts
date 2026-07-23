@@ -35,14 +35,24 @@ export async function logPrettyResponse(
 	rawBody?: string
 ): Promise<void> {
 	const responseBody = rawBody ?? (await response.text());
+	const fallback = {
+		success: response.ok(),
+		statusCode: response.status(),
+	};
 
 	try {
 		const parsedBody = JSON.parse(responseBody);
-		console.log(`${label} [${response.status()}]:`);
-		console.log(JSON.stringify(parsedBody, null, 2));
+		const compact = {
+			success:
+				typeof parsedBody?.success === 'boolean' ? parsedBody.success : fallback.success,
+			statusCode:
+				typeof parsedBody?.statusCode === 'number' ? parsedBody.statusCode : fallback.statusCode,
+		};
+
+		console.log(`${label} ${JSON.stringify(compact)}`);
 		return;
 	} catch {
-		console.log(`${label} [${response.status()}]: ${responseBody || '<empty body>'}`);
+		console.log(`${label} ${JSON.stringify(fallback)}`);
 	}
 }
 
